@@ -588,7 +588,7 @@ const ADMIN_USER = "admin";
 let html5QrCode = null;
 let isScanning = false;
 
-function initLogin() { if(!localStorage.getItem("adminPass")) localStorage.setItem("adminPass","1234"); }
+function initLogin() { if(!localStorage.getItem("adminPass")) localStorage.setItem("adminPass","5787"); }
 function login(){ const u = document.getElementById("loginUser").value; const p = document.getElementById("loginPass").value; if(u === ADMIN_USER && p === localStorage.getItem("adminPass")){ document.getElementById("loginScreen").style.display = "none"; mostrarMensaje('✅ Sesión iniciada', '#28a745'); } else { document.getElementById("loginError").style.display = "block"; } }
 
 function loadData() {
@@ -1351,3 +1351,4 @@ window.onload = loadData;
 </script>
 </body>
 </html>
+

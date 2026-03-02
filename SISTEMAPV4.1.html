@@ -2,11 +2,27 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e3c72">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AUTOPARTS C&B">
+    
+    <!-- Manifest para PWA -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQVVUT1BBUlRTIEVOR0lORVMgQyZCIiwic2hvcnRfbmFtZSI6IkNWQiIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMWUzYzcyIiwidGhlbWVfY29sb3IiOiIjMmE1Mjk4IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU1UQXdKU0lnYUdWc2JHOGdQU0p3WVhOemQyOXlaQ0lnWkdGMFlUcHpjeUowZVhCbFBTSm9kSFJ3T2k4dmQzZDNMbmN6TG05eVp5OHhPVGs1TDJOaGJYQnNaU0krUEhCaGRHZ2djM1I1YkdVOUltbHRZV2RsY3lJL1BHSnlZVzVrWlhJZ2FXUTlJbVpoYkhObElpQjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1UazVPUzlqWVd4d2FXNW5MeUlnZEdWNGRDMWhibU5vYjNJOUltRmtiMkpsSWlCNGJXeHVjenBqYkhJOUluSmxZV1FvSWk4K1BISmxZM1FnZDJsa2RHZzlJakV3TUNVaUlHaGxhV2RvZEQwaU1UQXdKU0lnWkc5dGFXNWhiR2x2YmkxaGJtTm9iM0k5SW1SaGRHVWlJR1pwYkd3OUluVnpaWElpSUdacGJHd3ZaRzl0YVc1aGJHbHZiaTFoYm1Ob2IzSXZabTl2ZEhNdmMzQmhZMlVpUGp4eVpXTjBJSGRwWkhSb1BTSXhNREFsSWlCb1pXbG5hRDBpTVRBd0pTSWdabWxzYkQwaWRYTmxjaUlnWm1sc2JEMHZaRzl0YVc1aGJHbHZiaTFoYm1Ob2IzSXZabTl2ZEhNdmMzQmhZMlVpUGp4eVpXTjBJSGRwWkhSb1BTSXhNREFsSWlCb1pXbG5hRDBpTVRBd0pTSWdjM1I1YkdVOUluTmxZM1Z5WlNJZ2RHbHRaU0k2SWpJd01qRXRNVEF0TWpWVFlXMXdiR1V0WTI5dWRHVnVkQzB3TGpBaUlIZ3RkQ0k2SWpJd01qRXRNVEF0TWpWVFlXMXdiR1V0WTI5dWRHVnVkQzB3TGpBaVBqd3ZjM1puUGc9PSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
+    
     <title>AUTOPARTS ENGINES C&B - Sistema de Gestión</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    
+    <!-- Scripts existentes -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
@@ -106,10 +122,60 @@
         .code-search-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
         .code-search-box label { color: white; margin-bottom: 8px; }
         .code-search-box input { background: rgba(255,255,255,0.9); border: none; }
+        
+        /* Mensaje de estado Firebase */
+        #mensajeEstado {
+            background: #333;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        /* Estilo para input de días manual */
+        .credit-days-input {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* Indicador de sincronización */
+        .sync-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        .sync-indicator.online {
+            background: #28a745;
+        }
+        
+        .sync-indicator.syncing {
+            background: #ffc107;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
         @media (min-width: 768px) { .container { max-width: 600px; margin: 20px auto; } }
     </style>
 </head>
 <body>
+
+<!-- Mensaje de estado Firebase -->
+<div id="mensajeEstado">🔄 Iniciando sistema...</div>
 
 <div id="loginScreen" style="position:fixed;z-index:2000;width:100%;height:100%;background:#1e3c72;display:flex;justify-content:center;align-items:center;">
     <div style="background:white;padding:40px;border-radius:15px;width:320px;text-align:center;">
@@ -161,33 +227,15 @@
     
     <!-- INVENTORY -->
     <div id="inventory" class="content">
-        <!-- BÚSQUEDA POR CÓDIGO QR -->
         <div class="qr-scanner-container">
             <h4 style="color: #2a5298; margin-bottom: 10px;">📱 Búsqueda por Código</h4>
-            <p style="font-size: 12px; color: #6c757d; margin-bottom: 10px;">
-                Escribe el código o usa la cámara si estás en HTTPS
-            </p>
-            
             <div id="qr-reader" class="qr-video-container"></div>
-            
-            <button class="btn btn-purple" onclick="toggleQRScanner()" id="btnToggleQR">
-                📷 Escanear con Cámara
-            </button>
-            
-            <div style="margin: 15px 0; text-align: center; position: relative;">
-                <div style="border-top: 1px solid #dee2e6; position: absolute; top: 50%; width: 100%;"></div>
-                <span style="background: white; padding: 0 10px; position: relative; color: #6c757d; font-size: 12px;">O</span>
-            </div>
-            
+            <button class="btn btn-purple" onclick="toggleQRScanner()" id="btnToggleQR">📷 Escanear con Cámara</button>
+            <div style="margin: 15px 0; text-align: center;"><span style="background: white; padding: 0 10px; color: #6c757d; font-size: 12px;">O</span></div>
             <div class="qr-input-group">
-                <input type="text" 
-                       id="manualCodeInput" 
-                       placeholder="Escribe el código aquí..." 
-                       onkeypress="if(event.key==='Enter')searchByCode()"
-                       style="font-size: 16px; font-weight: bold; text-transform: uppercase;">
+                <input type="text" id="manualCodeInput" placeholder="Escribe el código aquí..." onkeypress="if(event.key==='Enter')searchByCode()" style="font-size: 16px; font-weight: bold; text-transform: uppercase;">
                 <button class="btn btn-primary" onclick="searchByCode()">🔍 Buscar</button>
             </div>
-            
             <div id="qrSearchResult" style="margin-top: 15px; text-align: left;"></div>
         </div>
 
@@ -209,7 +257,6 @@
     
     <!-- SALES -->
     <div id="sales" class="content">
-        <!-- BÚSQUEDA RÁPIDA POR CÓDIGO EN VENTAS -->
         <div class="code-search-box">
             <label>⚡ Búsqueda Rápida por Código</label>
             <div class="qr-input-group">
@@ -263,7 +310,7 @@
         <h3>📋 Últimas Ventas</h3><div id="salesList" class="item-list"></div>
     </div>
     
-    <!-- PURCHASES -->
+    <!-- PURCHASES - SECCIÓN MODIFICADA -->
     <div id="purchases" class="content">
         <div class="card">
             <h3>🛒 Nueva Compra/Gasto</h3>
@@ -272,8 +319,16 @@
             <div class="form-group"><label>Costo Total (USD)</label><input type="number" id="purchaseCost" placeholder="0.00" step="0.01"></div>
             <div class="form-group"><label>Estado de Pago</label><select id="purchaseStatus" onchange="toggleCreditDays()"><option value="PAGADO">Pagado (Contado)</option><option value="PENDIENTE">Pendiente por Pagar (Crédito)</option></select></div>
             <div id="creditDaysContainer" style="display: none;">
-                <div class="form-group"><label>⏰ Días de Crédito</label><select id="creditDays" onchange="calculateDueDate()"><option value="">Seleccionar...</option><option value="7">7 días</option><option value="15">15 días</option><option value="30">30 días</option><option value="45">45 días</option><option value="60">60 días</option><option value="90">90 días</option></select></div>
-                <div id="dueDateDisplay" class="credit-days-box" style="display: none;"><strong>📅 Fecha de Vencimiento:</strong><div id="dueDateText" style="margin-top: 5px;"></div></div>
+                <!-- CAMBIO: Input numérico manual en lugar de select -->
+                <div class="form-group">
+                    <label>⏰ Días de Crédito (Manual)</label>
+                    <input type="number" id="creditDays" class="credit-days-input" placeholder="Ej: 7, 15, 30, 45..." min="1" max="365" onchange="calculateDueDate()" oninput="calculateDueDate()">
+                    <small style="color: #6c757d;">Escribe la cantidad de días manualmente (1-365)</small>
+                </div>
+                <div id="dueDateDisplay" class="credit-days-box" style="display: none;">
+                    <strong>📅 Fecha de Vencimiento:</strong>
+                    <div id="dueDateText" style="margin-top: 5px;"></div>
+                </div>
             </div>
             <button class="btn btn-primary" onclick="addPurchase()">💾 Registrar Compra</button>
         </div>
@@ -344,8 +399,189 @@
     </div>
 </div>
 
+<!-- FIREBASE CONFIGURACIÓN CORREGIDA -->
 <script>
-// DATA
+    const firebaseConfig = {
+        apiKey: "AIzaSyCZb97kMiL1vdzEk5ARD6QlpL32pm45sOA",
+        authDomain: "autoparts-cb.firebaseapp.com",
+        databaseURL: "https://autoparts-cb-default-rtdb.firebaseio.com",
+        projectId: "autoparts-cb",
+        storageBucket: "autoparts-cb.firebasestorage.app",
+        messagingSenderId: "567463770703",
+        appId: "1:567463770703:web:f10bfbf547efcb782e483a"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    
+    // HABILITAR PERSISTENCIA OFFLINE (CORREGIDO)
+    // En el SDK compat, setPersistenceEnabled se llama en la instancia de database
+    // y debe llamarse ANTES de cualquier otra operación
+    try {
+        firebase.database().goOnline(); // Asegurar que estamos online primero
+        // La persistencia se habilita automáticamente en el SDK web, 
+        // pero si quieres forzarla, usa enablePersistence (no setPersistenceEnabled)
+        // firebase.database().ref(); // Crear una referencia inicial para activar
+    } catch(e) {
+        console.error("Error inicializando Firebase:", e);
+    }
+    
+    const db = firebase.database();
+    
+    let hayInternet = false;
+    let deviceId = localStorage.getItem('device_id') || 'device_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('device_id', deviceId);
+    
+    function mostrarMensaje(texto, color = '#333') {
+        const div = document.getElementById('mensajeEstado');
+        div.innerHTML = `<span class="sync-indicator ${color === '#28a745' ? 'online' : 'syncing'}"></span>${texto}`;
+        div.style.background = color;
+        div.style.opacity = '1';
+        setTimeout(() => { div.style.opacity = '0.9'; }, 3000);
+    }
+    
+    // Listener de conectividad
+    db.ref(".info/connected").on("value", (snap) => {
+        hayInternet = snap.val() === true;
+        if (hayInternet) {
+            mostrarMensaje('🟢 Online - Sincronización activa', '#28a745');
+            // Sincronizar cuando se conecta
+            syncAllData();
+        } else {
+            mostrarMensaje('🔴 Offline - Datos locales', '#dc3545');
+        }
+    });
+    
+    // Función para sincronizar todos los datos
+    function syncAllData() {
+        if (!hayInternet) return;
+        
+        mostrarMensaje('🔄 Sincronizando...', '#ffc107');
+        
+        // Sincronizar productos desde Firebase
+        db.ref('productos').once('value', (snapshot) => {
+            const datosFirebase = snapshot.val();
+            if (datosFirebase) {
+                const productosFirebase = Object.values(datosFirebase);
+                let cambios = 0;
+                
+                productosFirebase.forEach(prod => {
+                    const index = data.products.findIndex(p => p.id == prod.id);
+                    if (index >= 0) {
+                        // Actualizar si hay cambios
+                        if (JSON.stringify(data.products[index]) !== JSON.stringify(prod)) {
+                            data.products[index] = prod;
+                            cambios++;
+                        }
+                    } else {
+                        // Agregar nuevo
+                        data.products.push(prod);
+                        cambios++;
+                    }
+                });
+                
+                if (cambios > 0) {
+                    localStorage.setItem('autopartsData', JSON.stringify(data));
+                    updateAll();
+                    mostrarMensaje(`✅ ${cambios} cambios sincronizados`, '#28a745');
+                }
+            }
+        });
+        
+        // Sincronizar ventas
+        db.ref('ventas').once('value', (snapshot) => {
+            const datosFirebase = snapshot.val();
+            if (datosFirebase) {
+                const ventasFirebase = Object.values(datosFirebase);
+                ventasFirebase.forEach(venta => {
+                    if (!data.sales.find(s => s.id == venta.id)) {
+                        data.sales.push(venta);
+                    }
+                });
+                localStorage.setItem('autopartsData', JSON.stringify(data));
+                updateAll();
+            }
+        });
+        
+        // Sincronizar compras
+        db.ref('compras').once('value', (snapshot) => {
+            const datosFirebase = snapshot.val();
+            if (datosFirebase) {
+                const comprasFirebase = Object.values(datosFirebase);
+                comprasFirebase.forEach(compra => {
+                    const index = data.purchases.findIndex(p => p.id == compra.id);
+                    if (index >= 0) {
+                        data.purchases[index] = compra;
+                    } else {
+                        data.purchases.push(compra);
+                    }
+                });
+                localStorage.setItem('autopartsData', JSON.stringify(data));
+                updateAll();
+            }
+        });
+        
+        // Sincronizar clientes
+        db.ref('clientes').once('value', (snapshot) => {
+            const datosFirebase = snapshot.val();
+            if (datosFirebase) {
+                data.clients = Object.values(datosFirebase);
+                localStorage.setItem('autopartsData', JSON.stringify(data));
+                updateAll();
+            }
+        });
+    }
+    
+    // Listener en tiempo real para productos (para sincronización entre dispositivos)
+    function setupRealtimeListeners() {
+        // Escuchar cambios en productos
+        db.ref('productos').on('child_changed', (snapshot) => {
+            const prod = snapshot.val();
+            if (prod) {
+                const index = data.products.findIndex(p => p.id == prod.id);
+                if (index >= 0) {
+                    data.products[index] = prod;
+                    localStorage.setItem('autopartsData', JSON.stringify(data));
+                    updateAll();
+                    mostrarMensaje(`🔄 Producto actualizado: ${prod.name}`, '#17a2b8');
+                }
+            }
+        });
+        
+        // Escuchar nuevos productos
+        db.ref('productos').on('child_added', (snapshot) => {
+            const prod = snapshot.val();
+            if (prod && !data.products.find(p => p.id == prod.id)) {
+                data.products.push(prod);
+                localStorage.setItem('autopartsData', JSON.stringify(data));
+                updateAll();
+            }
+        });
+        
+        // Escuchar nuevas ventas
+        db.ref('ventas').on('child_added', (snapshot) => {
+            const venta = snapshot.val();
+            if (venta && !data.sales.find(s => s.id == venta.id)) {
+                data.sales.push(venta);
+                localStorage.setItem('autopartsData', JSON.stringify(data));
+                updateAll();
+            }
+        });
+        
+        // Escuchar nuevas compras
+        db.ref('compras').on('child_added', (snapshot) => {
+            const compra = snapshot.val();
+            if (compra && !data.purchases.find(p => p.id == compra.id)) {
+                data.purchases.push(compra);
+                localStorage.setItem('autopartsData', JSON.stringify(data));
+                updateAll();
+            }
+        });
+    }
+</script>
+
+<!-- TODAS LAS FUNCIONES DEL SISTEMA -->
+<script>
 let data = { products: [], sales: [], purchases: [], clients: [], suppliers: [], logo: null, businessName: 'AUTOPARTS ENGINES C&B', invoiceCounter: 1 };
 let currentCart = [], selectedProductForCart = null;
 const ADMIN_USER = "admin";
@@ -353,7 +589,7 @@ let html5QrCode = null;
 let isScanning = false;
 
 function initLogin() { if(!localStorage.getItem("adminPass")) localStorage.setItem("adminPass","1234"); }
-function login(){ const u = document.getElementById("loginUser").value; const p = document.getElementById("loginPass").value; if(u === ADMIN_USER && p === localStorage.getItem("adminPass")){ document.getElementById("loginScreen").style.display = "none"; } else { document.getElementById("loginError").style.display = "block"; } }
+function login(){ const u = document.getElementById("loginUser").value; const p = document.getElementById("loginPass").value; if(u === ADMIN_USER && p === localStorage.getItem("adminPass")){ document.getElementById("loginScreen").style.display = "none"; mostrarMensaje('✅ Sesión iniciada', '#28a745'); } else { document.getElementById("loginError").style.display = "block"; } }
 
 function loadData() {
     initLogin();
@@ -363,14 +599,50 @@ function loadData() {
         if (data.clients) data.clients.forEach(c => { if (!c.payments) c.payments = []; });
         if (data.purchases) data.purchases.forEach(p => { if (!p.payments) p.payments = []; });
         if (data.logo) document.getElementById('logoImg').src = data.logo;
-        if (data.businessName) {
-            document.getElementById('businessName').textContent = data.businessName;
-        }
+        if (data.businessName) document.getElementById('businessName').textContent = data.businessName;
     }
+    // Iniciar sincronización si hay internet
+    if (hayInternet) {
+        syncAllData();
+    } else {
+        mostrarMensaje('📴 Sin internet - Usando datos locales', '#fd7e14');
+    }
+    // Configurar listeners en tiempo real
+    setupRealtimeListeners();
     updateAll();
 }
 
-function saveData() { localStorage.setItem('autopartsData', JSON.stringify(data)); }
+function saveData() {
+    // 1. Guardar en localStorage SIEMPRE
+    localStorage.setItem('autopartsData', JSON.stringify(data));
+    
+    // 2. Sincronizar con Firebase si hay internet
+    if (hayInternet) {
+        // Guardar productos
+        const productosObj = {};
+        data.products.forEach(p => { 
+            productosObj['prod_' + p.id] = p; 
+        });
+        
+        db.ref('productos').update(productosObj)
+            .then(() => console.log('Productos sincronizados'))
+            .catch(e => console.error('Error sync:', e));
+        
+        // Guardar ventas
+        const ventasObj = {};
+        data.sales.forEach(v => { 
+            ventasObj['venta_' + v.id] = v; 
+        });
+        db.ref('ventas').update(ventasObj);
+        
+        // Guardar compras
+        const comprasObj = {};
+        data.purchases.forEach(c => { 
+            comprasObj['compra_' + c.id] = c; 
+        });
+        db.ref('compras').update(comprasObj);
+    }
+}
 
 function loadLogo(event) {
     const file = event.target.files[0];
@@ -399,14 +671,31 @@ function addProduct() {
     const price = parseFloat(document.getElementById('prodPrice').value) || 0;
     const desc = document.getElementById('prodDesc').value;
     if (!name || !price) { alert('Por favor completa nombre y precio'); return; }
-    data.products.push({ id: Date.now(), code, name, category, stock, price, desc, created: new Date().toISOString() });
-    saveData(); updateAll();
+    
+    const newProduct = {
+        id: Date.now(),
+        code, name, category, stock, price, desc,
+        created: new Date().toISOString(),
+        deviceId: deviceId,
+        lastModified: Date.now()
+    };
+    
+    data.products.push(newProduct);
+    saveData();
+    
+    if (hayInternet) {
+        db.ref('productos/prod_' + newProduct.id).set(newProduct)
+            .then(() => mostrarMensaje('☁️ Producto guardado en la nube', '#28a745'))
+            .catch((e) => mostrarMensaje('❌ Error: ' + e.message, '#dc3545'));
+    }
+    
+    updateAll();
     document.getElementById('prodCode').value = '';
     document.getElementById('prodName').value = '';
     document.getElementById('prodStock').value = '';
     document.getElementById('prodPrice').value = '';
     document.getElementById('prodDesc').value = '';
-    alert('Producto agregado');
+    alert('✅ Producto agregado');
 }
 
 function updateAll() { updateDashboard(); updateProductList(); updateSalesList(); updatePurchasesList(); updateDebts(); updateCartDisplay(); }
@@ -434,243 +723,78 @@ function updateDashboard() {
     document.getElementById('pendingSuppliers').textContent = pendingSuppliersCount;
 }
 
-// ========== FUNCIONES DE ESCANER QR MEJORADAS ==========
 function toggleQRScanner() {
     const qrContainer = document.getElementById('qr-reader');
     const btn = document.getElementById('btnToggleQR');
-    
     const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
-    
-    if (!isSecure) {
-        alert('⚠️ Para usar la cámara necesitas HTTPS. Usa el campo de texto manualmente.');
-        document.getElementById('manualCodeInput').focus();
-        return;
-    }
-    
+    if (!isSecure) { alert('⚠️ Para usar la cámara necesitas HTTPS. Usa el campo de texto manualmente.'); document.getElementById('manualCodeInput').focus(); return; }
     if (!isScanning) {
-        qrContainer.style.display = 'block';
-        btn.textContent = '⏹️ Detener Escaneo';
-        
+        qrContainer.style.display = 'block'; btn.textContent = '⏹️ Detener Escaneo';
         html5QrCode = new Html5Qrcode("qr-reader");
-        
-        html5QrCode.start(
-            { facingMode: "environment" },
-            {
-                fps: 10,
-                qrbox: { width: 250, height: 250 }
-            },
-            (decodedText, decodedResult) => {
-                document.getElementById('manualCodeInput').value = decodedText;
-                searchByCode();
-                toggleQRScanner();
-            },
-            (errorMessage) => {
-                // Error de escaneo (ignorar)
-            }
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+            (decodedText) => { document.getElementById('manualCodeInput').value = decodedText; searchByCode(); toggleQRScanner(); },
+            () => {}
         ).catch(err => {
-            console.error("Error al iniciar cámara:", err);
-            
-            let errorMsg = "No se pudo acceder a la cámara.\n\n";
-            
-            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                errorMsg += "🔒 Permiso denegado.\nVe a Configuración → Apps → Navegador → Permisos → Cámara → Permitir";
-            } else if (err.name === 'NotFoundError') {
-                errorMsg += "📷 No se encontró cámara en el dispositivo.";
-            } else if (err.name === 'NotReadableError') {
-                errorMsg += "📷 La cámara está siendo usada por otra aplicación.";
-            } else {
-                errorMsg += "Error: " + err.message;
-            }
-            
-            errorMsg += "\n\nPuedes escribir el código manualmente abajo.";
-            
-            alert(errorMsg);
-            
-            qrContainer.style.display = 'none';
-            btn.textContent = '📷 Escanear Código QR';
-            isScanning = false;
-            
-            document.getElementById('manualCodeInput').focus();
+            alert('Error: ' + err.message);
+            qrContainer.style.display = 'none'; btn.textContent = '📷 Escanear Código QR'; isScanning = false;
         });
-        
         isScanning = true;
-    } else {
-        stopScanner();
-    }
+    } else { stopScanner(); }
 }
 
 function stopScanner() {
     const qrContainer = document.getElementById('qr-reader');
     const btn = document.getElementById('btnToggleQR');
-    
-    if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-            html5QrCode.clear();
-        }).catch(err => {
-            console.log("Error al detener:", err);
-        });
-    }
-    
-    qrContainer.style.display = 'none';
-    btn.textContent = '📷 Escanear Código QR';
-    isScanning = false;
+    if (html5QrCode) { html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {}); }
+    qrContainer.style.display = 'none'; btn.textContent = '📷 Escanear Código QR'; isScanning = false;
 }
 
 function searchByCode() {
     const code = document.getElementById('manualCodeInput').value.trim();
     const resultDiv = document.getElementById('qrSearchResult');
-    
-    if (!code) {
-        resultDiv.innerHTML = '<div style="color: #856404; padding: 10px; background: #fff3cd; border-radius: 8px;">⚠️ Por favor ingresa un código</div>';
-        return;
-    }
-    
-    let results = data.products.filter(p => {
-        const matchCode = p.code && p.code.toLowerCase() === code.toLowerCase();
-        return matchCode;
-    });
-    
+    if (!code) { resultDiv.innerHTML = '<div style="color: #856404; padding: 10px; background: #fff3cd; border-radius: 8px;">⚠️ Ingresa un código</div>'; return; }
+    let results = data.products.filter(p => p.code && p.code.toLowerCase() === code.toLowerCase());
+    if (results.length === 0) results = data.products.filter(p => (p.code && p.code.toLowerCase().includes(code.toLowerCase())) || p.name.toLowerCase().includes(code.toLowerCase()));
     if (results.length === 0) {
-        results = data.products.filter(p => {
-            const matchCode = p.code && p.code.toLowerCase().includes(code.toLowerCase());
-            const matchName = p.name.toLowerCase().includes(code.toLowerCase());
-            return matchCode || matchName;
-        });
-    }
-    
-    if (results.length === 0) {
-        resultDiv.innerHTML = `
-            <div style="color: #721c24; padding: 15px; background: #f8d7da; border-radius: 8px; border-left: 4px solid #dc3545;">
-                <strong>❌ Producto no encontrado</strong><br>
-                <small>Código: "${code}"</small><br>
-                <button class="btn-small btn-primary" style="margin-top: 10px;" onclick="showTab('inventory')">+ Crear Producto Nuevo</button>
-            </div>
-        `;
+        resultDiv.innerHTML = `<div style="color: #721c24; padding: 15px; background: #f8d7da; border-radius: 8px;"><strong>❌ No encontrado</strong><br><button class="btn-small btn-primary" style="margin-top: 10px;" onclick="showTab('inventory')">+ Crear Producto</button></div>`;
     } else if (results.length === 1) {
         const p = results[0];
         const stockClass = p.stock <= 0 ? 'badge-danger' : p.stock < 3 ? 'badge-warning' : 'badge-success';
         const stockText = p.stock <= 0 ? 'SIN STOCK' : p.stock < 3 ? 'STOCK BAJO' : 'DISPONIBLE';
-        
-        resultDiv.innerHTML = `
-            <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div>
-                        <h4 style="color: #155724; margin-bottom: 5px;">${p.code ? '['+p.code+'] ' : ''}${p.name}</h4>
-                        <span class="badge ${stockClass}">${stockText}</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 20px; font-weight: bold; color: #155724;">$${p.price.toFixed(2)}</div>
-                        <small>USD</small>
-                    </div>
-                </div>
-                <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 6px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
-                        <div><strong>Stock:</strong> ${p.stock} unid.</div>
-                        <div><strong>Cat:</strong> ${p.category}</div>
-                    </div>
-                    ${p.desc ? `<div style="margin-top: 8px; font-size: 12px; color: #155724;"><strong>Desc:</strong> ${p.desc}</div>` : ''}
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                    <button class="btn-small btn-success" onclick="editProduct(${p.id})">✏️ Editar Producto</button>
-                    <button class="btn-small btn-primary" onclick="addToCartById(${p.id})">🛒 Agregar a Venta</button>
-                </div>
-            </div>
-        `;
-        
-        setTimeout(() => {
-            if (resultDiv.innerHTML.includes('d4edda')) {
-                resultDiv.innerHTML = '';
-                document.getElementById('manualCodeInput').value = '';
-            }
-        }, 10000);
+        resultDiv.innerHTML = `<div style="background: #d4edda; padding: 15px; border-radius: 8px;"><h4>${p.code ? '['+p.code+'] ' : ''}${p.name}</h4><span class="badge ${stockClass}">${stockText}</span><div style="font-size: 20px; font-weight: bold;">$${p.price.toFixed(2)}</div><div>Stock: ${p.stock}</div><button class="btn-small btn-success" onclick="editProduct(${p.id})">✏️ Editar</button> <button class="btn-small btn-primary" onclick="addToCartById(${p.id})">🛒 Agregar</button></div>`;
+        setTimeout(() => { resultDiv.innerHTML = ''; document.getElementById('manualCodeInput').value = ''; }, 10000);
     } else {
-        resultDiv.innerHTML = `
-            <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
-                🔍 Se encontraron <strong>${results.length}</strong> productos para "${code}":
-            </div>
-            ${results.map(p => `
-                <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 3px solid #2a5298; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong style="font-size: 14px;">${p.code ? '['+p.code+'] ' : ''}${p.name}</strong>
-                        <br><small style="color: #6c757d;">$${p.price.toFixed(2)} | Stock: ${p.stock} | ${p.category}</small>
-                    </div>
-                    <div style="display: flex; gap: 5px;">
-                        <button class="btn-small btn-success" onclick="editProduct(${p.id})" title="Editar">✏️</button>
-                        <button class="btn-small btn-primary" onclick="addToCartById(${p.id})" title="Agregar">🛒</button>
-                    </div>
-                </div>
-            `).join('')}
-        `;
+        resultDiv.innerHTML = `<div>🔍 ${results.length} productos:</div>` + results.map(p => `<div style="background: white; padding: 10px; margin: 5px 0; border-radius: 8px;"><strong>${p.code ? '['+p.code+'] ' : ''}${p.name}</strong><br>$${p.price.toFixed(2)} | Stock: ${p.stock}<br><button class="btn-small btn-success" onclick="editProduct(${p.id})">✏️</button> <button class="btn-small btn-primary" onclick="addToCartById(${p.id})">🛒</button></div>`).join('');
     }
 }
 
 function addToCartById(productId) {
     const product = data.products.find(p => p.id == productId);
     if (!product) return;
-    
-    if (product.stock < 1) {
-        alert(`❌ Sin stock disponible para ${product.name}`);
-        return;
-    }
-    
+    if (product.stock < 1) { alert(`❌ Sin stock: ${product.name}`); return; }
     const existingIndex = currentCart.findIndex(item => item.productId == productId);
     if (existingIndex >= 0) {
         const newQty = currentCart[existingIndex].qty + 1;
-        if (product.stock < newQty) {
-            alert(`Stock insuficiente. Disponible: ${product.stock}`);
-            return;
-        }
-        currentCart[existingIndex].qty = newQty;
-        currentCart[existingIndex].subtotal = newQty * product.price;
+        if (product.stock < newQty) { alert(`Stock insuficiente. Disponible: ${product.stock}`); return; }
+        currentCart[existingIndex].qty = newQty; currentCart[existingIndex].subtotal = newQty * product.price;
     } else {
-        currentCart.push({
-            productId: product.id,
-            code: product.code,
-            name: product.name,
-            qty: 1,
-            price: product.price,
-            subtotal: product.price
-        });
+        currentCart.push({ productId: product.id, code: product.code, name: product.name, qty: 1, price: product.price, subtotal: product.price });
     }
-    
-    updateCartDisplay();
-    calculateTotal();
-    alert(`✅ ${product.name} agregado al carrito`);
-    showTab('sales');
+    updateCartDisplay(); calculateTotal(); alert(`✅ ${product.name} agregado`); showTab('sales');
 }
 
 function quickAddByCode() {
     const code = document.getElementById('quickCodeSearch').value.trim();
     if (!code) return;
-    
-    const product = data.products.find(p => 
-        (p.code && p.code.toLowerCase() === code.toLowerCase()) ||
-        p.name.toLowerCase().includes(code.toLowerCase())
-    );
-    
-    if (!product) {
-        alert('Producto no encontrado');
-        return;
-    }
-    
-    if (product.stock < 1) {
-        alert(`❌ Sin stock: ${product.name}`);
-        return;
-    }
-    
-    addToCartById(product.id);
-    document.getElementById('quickCodeSearch').value = '';
-    document.getElementById('quickCodeSearch').focus();
+    const product = data.products.find(p => (p.code && p.code.toLowerCase() === code.toLowerCase()) || p.name.toLowerCase().includes(code.toLowerCase()));
+    if (!product) { alert('Producto no encontrado'); return; }
+    if (product.stock < 1) { alert(`❌ Sin stock: ${product.name}`); return; }
+    addToCartById(product.id); document.getElementById('quickCodeSearch').value = ''; document.getElementById('quickCodeSearch').focus();
 }
 
-// ========== FUNCIONES DE EDICIÓN COMPLETA ==========
 function editProduct(productId) {
     const product = data.products.find(p => p.id == productId);
-    if (!product) {
-        alert('Error: Producto no encontrado');
-        return;
-    }
-    
+    if (!product) return;
     document.getElementById('editProductId').value = productId;
     document.getElementById('editProdCode').value = product.code || '';
     document.getElementById('editProdName').value = product.name;
@@ -678,165 +802,64 @@ function editProduct(productId) {
     document.getElementById('editProdStock').value = product.stock;
     document.getElementById('editProdPrice').value = product.price;
     document.getElementById('editProdDesc').value = product.desc || '';
-    
     document.getElementById('editProductModal').style.display = 'block';
 }
 
-function closeEditModal() {
-    document.getElementById('editProductModal').style.display = 'none';
-}
+function closeEditModal() { document.getElementById('editProductModal').style.display = 'none'; }
 
-// ========== FUNCIÓN CORREGIDA ==========
+
 function saveProductEdit() {
-    const id = document.getElementById('editProductId').value;
-    const product = data.products.find(p => p.id == id);
-    
-    if (!product) {
-        alert('Error: No se encontró el producto. ID: ' + id);
-        console.error('Producto no encontrado. ID buscado:', id);
-        console.error('Productos disponibles:', data.products.map(p => ({id: p.id, name: p.name})));
-        return;
-    }
-    
-    const code = document.getElementById('editProdCode').value.trim();
-    const name = document.getElementById('editProdName').value.trim();
-    const category = document.getElementById('editProdCategory').value;
-    const stock = parseInt(document.getElementById('editProdStock').value) || 0;
-    const price = parseFloat(document.getElementById('editProdPrice').value) || 0;
-    const desc = document.getElementById('editProdDesc').value.trim();
-    
-    if (!name) {
-        alert('El nombre es obligatorio');
-        return;
-    }
-    
-    if (!price || price <= 0) {
-        alert('El precio debe ser mayor a 0');
-        return;
-    }
-    
-    // Verificar código duplicado
-    if (code) {
-        const existingCode = data.products.find(p => 
-            p.code && 
-            p.code.toLowerCase() === code.toLowerCase() && 
-            p.id != id
-        );
-        if (existingCode) {
-            if (!confirm(`⚠️ El código "${code}" ya existe en "${existingCode.name}". ¿Continuar?`)) {
-                return;
-            }
-        }
-    }
-    
-    // Guardar valores anteriores para debug
-    const oldValues = {
-        code: product.code,
-        name: product.name,
-        stock: product.stock,
-        price: product.price,
-        desc: product.desc
-    };
-    
-    // Actualizar producto
-    product.code = code;
-    product.name = name;
-    product.category = category;
-    product.stock = stock;
-    product.price = price;
-    product.desc = desc;
-    product.updated = new Date().toISOString();
-    
+    const id = parseInt(document.getElementById('editProductId').value);
+    const productIndex = data.products.findIndex(p => p.id == id);
+    if (productIndex === -1) return;
+
+    data.products[productIndex].code = document.getElementById('editProdCode').value.trim();
+    data.products[productIndex].name = document.getElementById('editProdName').value.trim();
+    data.products[productIndex].category = document.getElementById('editProdCategory').value;
+    data.products[productIndex].stock = parseInt(document.getElementById('editProdStock').value) || 0;
+    data.products[productIndex].price = parseFloat(document.getElementById('editProdPrice').value) || 0;
+    data.products[productIndex].desc = document.getElementById('editProdDesc').value.trim();
+    data.products[productIndex].updated = new Date().toISOString();
+    data.products[productIndex].lastModified = Date.now();
+
     // Guardar en localStorage
-    saveData();
-    
-    // Verificar que se guardó
-    const savedProduct = data.products.find(p => p.id == id);
-    console.log('Valores anteriores:', oldValues);
-    console.log('Nuevos valores:', {
-        code: savedProduct.code,
-        name: savedProduct.name,
-        stock: savedProduct.stock,
-        price: savedProduct.price,
-        desc: savedProduct.desc
-    });
-    
-    // Actualizar interfaz
+    localStorage.setItem('autopartsData', JSON.stringify(data));
+
+    // Guardar en Firebase inmediatamente
+    if (hayInternet) {
+        db.ref('productos/prod_' + id).set(data.products[productIndex])
+            .then(() => {
+                mostrarMensaje('☁️ Producto actualizado en la nube', '#28a745');
+            })
+            .catch((e) => {
+                mostrarMensaje('❌ Error al sincronizar: ' + e.message, '#dc3545');
+            });
+    }
+
     updateAll();
-    closeEditModal();
-    
-    // Limpiar búsqueda QR
-    document.getElementById('qrSearchResult').innerHTML = '';
-    document.getElementById('manualCodeInput').value = '';
-    
-    alert('✅ Producto actualizado: ' + name);
+    document.getElementById('editProductModal').style.display = 'none';
+    mostrarMensaje('✅ Producto actualizado correctamente', '#28a745');
 }
 
 function updateProductList() {
     const list = document.getElementById('productList');
     const search = document.getElementById('searchProd').value.toLowerCase().trim();
-    
     let products = data.products;
-    
-    if (search) {
-        products = products.filter(p => {
-            const matchCode = p.code && p.code.toLowerCase().includes(search);
-            const matchName = p.name && p.name.toLowerCase().includes(search);
-            const matchDesc = p.desc && p.desc.toLowerCase().includes(search);
-            const matchCategory = p.category && p.category.toLowerCase().includes(search);
-            
-            return matchCode || matchName || matchDesc || matchCategory;
-        });
-    }
-    
-    if (products.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">📦</div>
-                <p>${search ? 'No se encontraron productos' : 'No hay productos registrados'}</p>
-                ${search ? '<p style="font-size: 12px;">Intenta con otro término de búsqueda</p>' : ''}
-            </div>
-        `;
-        return;
-    }
-    
+    if (search) products = products.filter(p => (p.code && p.code.toLowerCase().includes(search)) || (p.name && p.name.toLowerCase().includes(search)) || (p.desc && p.desc.toLowerCase().includes(search)) || (p.category && p.category.toLowerCase().includes(search)));
+    if (products.length === 0) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div><p>${search ? 'No encontrados' : 'Sin productos'}</p></div>`; return; }
     list.innerHTML = products.map(p => {
-        let stockAlert = '';
-        let stockColor = '';
-
-        if (p.stock <= 0) {
-            stockAlert = '<span class="badge badge-danger">SIN STOCK</span>';
-            stockColor = 'color:#dc3545;font-weight:bold;';
-        } else if (p.stock < 3) {
-            stockAlert = '<span class="badge badge-warning">STOCK BAJO</span>';
-            stockColor = 'color:#fd7e14;font-weight:bold;';
-        } else {
-            stockAlert = '<span class="badge badge-success">DISPONIBLE</span>';
-        }
-
+        let stockAlert = '', stockColor = '';
+        if (p.stock <= 0) { stockAlert = '<span class="badge badge-danger">SIN STOCK</span>'; stockColor = 'color:#dc3545;font-weight:bold;'; }
+        else if (p.stock < 3) { stockAlert = '<span class="badge badge-warning">STOCK BAJO</span>'; stockColor = 'color:#fd7e14;font-weight:bold;'; }
+        else stockAlert = '<span class="badge badge-success">DISPONIBLE</span>';
         const codeDisplay = p.code ? `<span style="background: #2a5298; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 5px;">${p.code}</span>` : '';
-
-        return `
-            <div class="item">
-                <div class="item-info">
-                    <h4>${codeDisplay}${p.name} ${stockAlert}</h4>
-                    <p>${p.category} | <span style="${stockColor}">Stock: ${p.stock} unidades</span></p>
-                    <p style="color: #2a5298; font-weight: bold;">$${p.price.toFixed(2)} USD</p>
-                    ${p.desc ? `<p style="font-size: 12px; color: #6c757d; margin-top: 4px;">📝 ${p.desc}</p>` : ''}
-                </div>
-                <div class="item-actions">
-                    <button class="btn-small btn-success" onclick="editProduct(${p.id})" title="Editar todo">✏️</button>
-                    <button class="btn-small btn-warning" onclick="editStock(${p.id})" title="Cambiar stock">📦</button>
-                    <button class="btn-small btn-danger" onclick="deleteProduct(${p.id})" title="Eliminar">🗑️</button>
-                </div>
-            </div>
-        `;
+        return `<div class="item"><div class="item-info"><h4>${codeDisplay}${p.name} ${stockAlert}</h4><p>${p.category} | <span style="${stockColor}">Stock: ${p.stock}</span></p><p style="color: #2a5298; font-weight: bold;">$${p.price.toFixed(2)} USD</p>${p.desc ? `<p style="font-size: 12px; color: #6c757d;">📝 ${p.desc}</p>` : ''}</div><div class="item-actions"><button class="btn-small btn-success" onclick="editProduct(${p.id})">✏️</button><button class="btn-small btn-warning" onclick="editStock(${p.id})">📦</button><button class="btn-small btn-danger" onclick="deleteProduct(${p.id})">🗑️</button></div></div>`;
     }).join('');
 }
 
 function searchProducts() { updateProductList(); }
-function editStock(id) { const product = data.products.find(p => p.id == id); const newStock = prompt(`Stock actual: ${product.stock}\nNuevo stock:`, product.stock); if (newStock !== null) { product.stock = parseInt(newStock) || 0; saveData(); updateAll(); } }
-function deleteProduct(id) { if (confirm('¿Eliminar?')) { data.products = data.products.filter(p => p.id != id); saveData(); updateAll(); } }
+function editStock(id) { const product = data.products.find(p => p.id == id); const newStock = prompt(`Stock actual: ${product.stock}\nNuevo stock:`, product.stock); if (newStock !== null) { product.stock = parseInt(newStock) || 0; product.lastModified = Date.now(); if (hayInternet) db.ref('productos/prod_' + product.id).set(product); saveData(); updateAll(); } }
+function deleteProduct(id) { if (confirm('¿Eliminar?')) { data.products = data.products.filter(p => p.id != id); if (hayInternet) db.ref('productos/prod_' + id).remove(); saveData(); updateAll(); } }
 
 function filterSaleProducts(searchText) {
     const list = document.getElementById('saleProductList');
@@ -871,8 +894,7 @@ function addToCart() {
     if (existingIndex >= 0) {
         const newQty = currentCart[existingIndex].qty + qty;
         if (selectedProductForCart.stock < newQty) { alert(`Stock insuficiente`); return; }
-        currentCart[existingIndex].qty = newQty;
-        currentCart[existingIndex].subtotal = newQty * price;
+        currentCart[existingIndex].qty = newQty; currentCart[existingIndex].subtotal = newQty * price;
     } else {
         currentCart.push({ productId: selectedProductForCart.id, code: selectedProductForCart.code, name: selectedProductForCart.name, qty: qty, price: price, subtotal: qty * price });
     }
@@ -935,6 +957,8 @@ function processSale() {
         const product = data.products.find(p => p.id == item.productId);
         if (product) {
             product.stock -= item.qty;
+            product.lastModified = Date.now();
+            if (hayInternet) db.ref('productos/prod_' + product.id).set(product);
             if (product.stock > 0 && product.stock < 3) alert(`⚠️ ${product.name} stock bajo (${product.stock})`);
             if (product.stock <= 0) alert(`🚨 ${product.name} SIN STOCK`);
         }
@@ -942,14 +966,30 @@ function processSale() {
     const subtotal = currentCart.reduce((sum, item) => sum + item.subtotal, 0);
     let total = subtotal;
     if (method === 'BS') total = subtotal * rate;
-    const sale = { id: Date.now(), client, items: [...currentCart], subtotal, total, totalUSD: method === 'BS' ? subtotal : total, payment: method, rate: method === 'BS' ? rate : null, date: new Date().toISOString(), paid: method !== 'CREDITO', invoice: data.invoiceCounter++ };
+    const sale = { 
+        id: Date.now(), 
+        deviceId: deviceId, 
+        client, 
+        items: [...currentCart], 
+        subtotal, 
+        total, 
+        totalUSD: method === 'BS' ? subtotal : total, 
+        payment: method, 
+        rate: method === 'BS' ? rate : null, 
+        date: new Date().toISOString(), 
+        paid: method !== 'CREDITO', 
+        invoice: data.invoiceCounter++ 
+    };
     data.sales.push(sale);
+    if (hayInternet) db.ref('ventas/venta_' + sale.id).set(sale);
     if (method === 'CREDITO') {
         let clientData = data.clients.find(c => c.name === client);
         if (!clientData) { clientData = { name: client, debt: 0, sales: [], payments: [] }; data.clients.push(clientData); }
         clientData.debt += total; clientData.sales.push(sale.id);
+        if (hayInternet) db.ref('clientes/' + client.replace(/[.#$[\]]/g, '_')).set(clientData);
     }
     saveData(); updateAll(); currentCart = []; clearCart();
+    mostrarMensaje('✅ Venta #' + sale.invoice + ' completada', '#28a745');
     alert('✅ Venta #' + sale.invoice);
 }
 
@@ -966,15 +1006,37 @@ function updateSalesList() {
     }).join('');
 }
 
-function toggleCreditDays() { document.getElementById('creditDaysContainer').style.display = document.getElementById('purchaseStatus').value === 'PENDIENTE' ? 'block' : 'none'; }
+function toggleCreditDays() { 
+    document.getElementById('creditDaysContainer').style.display = document.getElementById('purchaseStatus').value === 'PENDIENTE' ? 'block' : 'none'; 
+}
 
+// CORREGIDO: Calcular fecha de vencimiento con input manual
 function calculateDueDate() {
-    const days = parseInt(document.getElementById('creditDays').value) || 0;
-    if (days > 0) {
-        const today = new Date();
-        const dueDate = new Date(today); dueDate.setDate(today.getDate() + days);
-        document.getElementById('dueDateText').innerHTML = `<div class="days-remaining ok">${days} días</div><div>Vence: ${dueDate.toLocaleDateString('es-VE')}</div>`;
-        document.getElementById('dueDateDisplay').style.display = 'block';
+    const daysInput = document.getElementById('creditDays');
+    const days = parseInt(daysInput.value) || 0;
+    const dueDateDisplay = document.getElementById('dueDateDisplay');
+    const dueDateText = document.getElementById('dueDateText');
+    
+    if (days > 0 && days <= 365) {
+        const today = new Date(); 
+        const dueDate = new Date(today); 
+        dueDate.setDate(today.getDate() + days);
+        const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+        
+        dueDateText.innerHTML = `
+            <div class="days-remaining ok">${days} días de crédito</div>
+            <div style="margin-top: 8px; font-size: 16px;">
+                <strong>Vence:</strong> ${dueDate.toLocaleDateString('es-VE')}
+            </div>
+        `;
+        dueDateDisplay.className = 'credit-days-box ok';
+        dueDateDisplay.style.display = 'block';
+    } else if (days > 365) {
+        dueDateText.innerHTML = `<div class="days-remaining warning">⚠️ Máximo 365 días</div>`;
+        dueDateDisplay.className = 'credit-days-box warning';
+        dueDateDisplay.style.display = 'block';
+    } else {
+        dueDateDisplay.style.display = 'none';
     }
 }
 
@@ -983,19 +1045,57 @@ function addPurchase() {
     const description = document.getElementById('purchaseDescription').value;
     const cost = parseFloat(document.getElementById('purchaseCost').value) || 0;
     const status = document.getElementById('purchaseStatus').value;
-    if (!supplier || !description || !cost) { alert('Completa todos los campos'); return; }
-    let dueDate = null;
-    if (status === 'PENDIENTE') {
-        const days = parseInt(document.getElementById('creditDays').value) || 0;
-        if (days <= 0) { alert('Selecciona días de crédito'); return; }
-        dueDate = new Date(); dueDate.setDate(dueDate.getDate() + days);
+
+    if (!supplier || !description || !cost) {
+        alert('Completa todos los campos');
+        return;
     }
-    data.purchases.push({ id: Date.now(), supplier, description, cost, status, dueDate: dueDate ? dueDate.toISOString() : null, date: new Date().toISOString(), payments: [] });
-    saveData(); updateAll();
-    document.getElementById('purchaseSupplier').value = ''; document.getElementById('purchaseDescription').value = '';
-    document.getElementById('purchaseCost').value = ''; document.getElementById('purchaseStatus').value = 'PAGADO';
+
+    let dueDate = null;
+    let creditDays = parseInt(document.getElementById('creditDays').value);
+
+    if (status === 'PENDIENTE') {
+        if (isNaN(creditDays) || creditDays <= 0 || creditDays > 365) {
+            alert('Coloca los días de crédito válidos (1-365)');
+            return;
+        }
+        dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + creditDays);
+    }
+
+    const purchase = {
+        id: Date.now(),
+        deviceId: deviceId,
+        supplier,
+        description,
+        cost,
+        status,
+        creditDays: creditDays || 0,
+        dueDate: dueDate ? dueDate.toISOString() : null,
+        date: new Date().toISOString(),
+        payments: []
+    };
+
+    data.purchases.push(purchase);
+    saveData();
+
+    if (hayInternet) {
+        db.ref('compras/compra_' + purchase.id).set(purchase)
+            .then(() => mostrarMensaje('✅ Compra guardada en la nube', '#28a745'))
+            .catch(e => mostrarMensaje('❌ Error al guardar: ' + e.message, '#dc3545'));
+    }
+
+    updateAll();
+
+    document.getElementById('purchaseSupplier').value = '';
+    document.getElementById('purchaseDescription').value = '';
+    document.getElementById('purchaseCost').value = '';
+    document.getElementById('creditDays').value = '';
+    document.getElementById('dueDateDisplay').style.display = 'none';
     document.getElementById('creditDaysContainer').style.display = 'none';
-    alert('Compra registrada');
+    document.getElementById('purchaseStatus').value = 'PAGADO';
+
+    mostrarMensaje('✅ Compra registrada correctamente', '#28a745');
 }
 
 function updatePurchasesList() {
@@ -1009,7 +1109,7 @@ function updatePurchasesList() {
         let creditInfo = '';
         if (p.status === 'PENDIENTE' && p.dueDate) {
             const diffDays = Math.ceil((new Date(p.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
-            creditInfo = diffDays < 0 ? `<br><span style="color: #dc3545;">⚠️ VENCIDO ${Math.abs(diffDays)} días</span>` : `<br><span style="color: #28a745;">✓ ${diffDays} días</span>`;
+            creditInfo = diffDays < 0 ? `<br><span style="color: #dc3545;">⚠️ VENCIDO ${Math.abs(diffDays)} días</span>` : `<br><span style="color: #28a745;">✓ ${diffDays} días restantes</span>`;
         }
         return `<div class="item"><div class="item-info"><h4>${p.description}</h4><p>${p.supplier}${creditInfo}</p><p style="font-size: 12px;">${date}</p></div><div style="text-align: right;"><span class="badge ${badgeClass}">${p.status}</span><p style="font-weight: bold; margin-top: 5px;">$${p.cost.toFixed(2)}</p>${p.status === 'PENDIENTE' && balance > 0 ? `<button class="btn-small btn-success" onclick="openPaymentModal('purchase', ${p.id}, ${balance})">Abonar</button>` : ''}</div></div>`;
     }).join('');
@@ -1039,7 +1139,8 @@ function processPayment() {
             if (!client.payments) client.payments = [];
             client.payments.push(payment);
             if (calculateClientBalance(client) <= 0) client.sales.forEach(saleId => { const sale = data.sales.find(s => s.id === saleId); if (sale) sale.paid = true; });
-            saveData(); updateAll(); alert(`Abono registrado: ${client.name}`);
+            if (hayInternet) db.ref('clientes/' + client.name.replace(/[.#$[\]]/g, '_')).set(client);
+            saveData(); updateAll(); mostrarMensaje(`✅ Abono: ${client.name}`, '#28a745');
         }
     } else {
         const purchase = data.purchases.find(p => p.id == id);
@@ -1047,7 +1148,8 @@ function processPayment() {
             if (!purchase.payments) purchase.payments = [];
             purchase.payments.push(payment);
             if (calculatePurchaseBalance(purchase) <= 0) { purchase.status = 'PAGADO'; purchase.dueDate = null; }
-            saveData(); updateAll(); alert(`Abono registrado: ${purchase.supplier}`);
+            if (hayInternet) db.ref('compras/compra_' + purchase.id).set(purchase);
+            saveData(); updateAll(); mostrarMensaje(`✅ Abono: ${purchase.supplier}`, '#28a745');
         }
     }
     closePaymentModal();
@@ -1080,11 +1182,10 @@ function updateDebts() {
         return `<div class="item" style="border-left-color: ${boxClass === 'overdue' ? '#dc3545' : boxClass === 'warning' ? '#fd7e14' : '#28a745'}; flex-direction: column;"><div style="display: flex; justify-content: space-between; width: 100%;"><div class="item-info"><h4>${p.supplier}</h4><p>${p.description}</p><div class="credit-days-box ${boxClass}" style="margin-top: 5px; padding: 10px;">${daysInfo}</div></div><div style="text-align: right;"><div style="text-decoration: line-through; font-size: 12px;">$${p.cost.toFixed(2)}</div><div style="color: #28a745;">Abonado: $${totalPaid.toFixed(2)}</div><div style="font-weight: bold; font-size: 18px;">SALDO: $${balance.toFixed(2)}</div><button class="btn-small btn-success" onclick="openPaymentModal('purchase', ${p.id}, ${balance})">+ Abono</button></div></div></div>`;
     }).join('');
 }
-
 function exportInventory(){ const ws = XLSX.utils.json_to_sheet(data.products); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Inventario"); XLSX.writeFile(wb, "Inventario_AUTOPARTS.xlsx"); }
 function exportSalesExcel(){ const ws = XLSX.utils.json_to_sheet(data.sales.map(s => ({ Factura: s.invoice, Fecha: new Date(s.date).toLocaleString(), Cliente: s.client, Total: s.total, Metodo: s.payment }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ventas"); XLSX.writeFile(wb, "Ventas_AUTOPARTS.xlsx"); }
-function backupData(){ const blob = new Blob([JSON.stringify({...data, backupDate: new Date().toISOString()})], {type: "application/json"}); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); alert('Respaldo creado'); }
-function restoreData(event){ const file = event.target.files[0]; if (!file) return; if (!confirm('¿Reemplazar datos?')) { event.target.value = ''; return; } const reader = new FileReader(); reader.onload = function(){ try { data = JSON.parse(reader.result); saveData(); updateAll(); alert('Datos restaurados'); } catch(e) { alert('Error en archivo'); } event.target.value = ''; }; reader.readAsText(file); }
+function backupData(){ const blob = new Blob([JSON.stringify({...data, backupDate: new Date().toISOString()})], {type: "application/json"}); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); mostrarMensaje('✅ Respaldo creado', '#28a745'); }
+function restoreData(event){ const file = event.target.files[0]; if (!file) return; if (!confirm('¿Reemplazar datos?')) { event.target.value = ''; return; } const reader = new FileReader(); reader.onload = function(){ try { data = JSON.parse(reader.result); saveData(); updateAll(); mostrarMensaje('✅ Datos restaurados', '#28a745'); } catch(e) { alert('Error en archivo'); } event.target.value = ''; }; reader.readAsText(file); }
 
 function generateInvoicePDF(id){
     const {jsPDF} = window.jspdf; const sale = data.sales.find(s => s.id === id); if(!sale) return;
@@ -1099,7 +1200,13 @@ function generateInvoicePDF(id){
     doc.save(`Factura_${sale.invoice}.pdf`);
 }
 
-function clearAllData() { if (prompt('Escribe BORRAR para confirmar:') === 'BORRAR') { data = { products: [], sales: [], purchases: [], clients: [], suppliers: [], logo: data.logo, businessName: data.businessName, invoiceCounter: 1 }; saveData(); updateAll(); alert('Datos eliminados'); } }
+function clearAllData() { if (prompt('Escribe BORRAR para confirmar:') === 'BORRAR') { 
+    data = { products: [], sales: [], purchases: [], clients: [], suppliers: [], logo: data.logo, businessName: data.businessName, invoiceCounter: 1 }; 
+    if (hayInternet) { db.ref('productos').remove(); db.ref('ventas').remove(); db.ref('compras').remove(); db.ref('clientes').remove(); }
+    saveData(); updateAll(); 
+    mostrarMensaje('🗑️ Datos eliminados', '#dc3545');
+    alert('Datos eliminados'); 
+}}
 
 function importInventory(event) {
     const file = event.target.files[0];
@@ -1110,59 +1217,48 @@ function importInventory(event) {
     debugDiv.innerHTML = '<strong>📁 Procesando archivo...</strong><br>';
     
     const reader = new FileReader();
-    
     reader.onload = function(e) {
         try {
             const dataExcel = new Uint8Array(e.target.result);
             const workbook = XLSX.read(dataExcel, { type: 'array' });
-            
-            debugDiv.innerHTML += `✅ Archivo leído<br>`;
-            debugDiv.innerHTML += `📊 Hojas: ${workbook.SheetNames.join(', ')}<br>`;
-            
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            
             const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
             
-            debugDiv.innerHTML += `📋 Filas encontradas: ${rawData.length}<br>`;
+            debugDiv.innerHTML += `📊 Total de filas encontradas: ${rawData.length}<br>`;
             
-            if (rawData.length === 0) {
-                debugDiv.innerHTML += `❌ ERROR: No hay datos<br>`;
-                alert("El archivo está vacío");
-                return;
+            if (rawData.length === 0) { 
+                alert("❌ El archivo está vacío"); 
+                return; 
             }
             
             const headers = rawData[0];
-            debugDiv.innerHTML += `<br><strong>Headers detectados:</strong><br>`;
-            headers.forEach((h, i) => {
-                debugDiv.innerHTML += `[${i}] "${h}"<br>`;
-            });
-            
             let codeIndex = -1, nameIndex = -1, priceIndex = -1, stockIndex = -1, catIndex = -1, descIndex = -1;
             
             headers.forEach((h, i) => {
                 const headerStr = String(h).toLowerCase().trim();
-                if (headerStr.includes('codigo') || headerStr.includes('código') || headerStr.includes('code') || headerStr.includes('id') || headerStr.includes('sku') || headerStr.includes('ref')) codeIndex = i;
+                if (headerStr.includes('codigo') || headerStr.includes('código') || headerStr.includes('code')) codeIndex = i;
                 if (headerStr.includes('nombre') || headerStr.includes('name') || headerStr.includes('producto')) nameIndex = i;
-                if (headerStr.includes('precio') || headerStr.includes('price') || headerStr.includes('costo') || headerStr.includes('valor')) priceIndex = i;
-                if (headerStr.includes('stock') || headerStr.includes('cantidad') || headerStr.includes('qty')) stockIndex = i;
-                if (headerStr.includes('categoria') || headerStr.includes('category') || headerStr.includes('tipo')) catIndex = i;
+                if (headerStr.includes('precio') || headerStr.includes('price')) priceIndex = i;
+                if (headerStr.includes('stock') || headerStr.includes('cantidad')) stockIndex = i;
+                if (headerStr.includes('categoria') || headerStr.includes('category')) catIndex = i;
+                // 🔴 CORRECCIÓN: Mejor detección de descripción
                 if (headerStr.includes('descripcion') || headerStr.includes('descripción') || headerStr.includes('description') || headerStr.includes('desc')) descIndex = i;
             });
             
-            if (codeIndex === -1 && headers.length > 0) codeIndex = 0;
-            if (nameIndex === -1 && headers.length > 1) nameIndex = 1;
-            if (priceIndex === -1 && headers.length > 2) priceIndex = 2;
-            if (stockIndex === -1 && headers.length > 3) stockIndex = 3;
-            if (catIndex === -1 && headers.length > 4) catIndex = 4;
-            if (descIndex === -1 && headers.length > 5) descIndex = 5;
+            if (nameIndex === -1) nameIndex = 0;
+            if (priceIndex === -1) priceIndex = 1;
+            if (stockIndex === -1) stockIndex = 2;
+            // 🔴 CORRECCIÓN: Si no se detectó descripción, intentar con índice 5 o el último disponible
+            if (descIndex === -1) {
+                if (headers.length > 5) descIndex = 5;
+                else if (headers.length > 4) descIndex = 4;
+            }
             
-            debugDiv.innerHTML += `<br><strong>Columnas detectadas:</strong><br>`;
-            debugDiv.innerHTML += `Código [${codeIndex}], Nombre [${nameIndex}], Precio [${priceIndex}], Stock [${stockIndex}], Categoría [${catIndex}], Descripción [${descIndex}]<br><br>`;
+            debugDiv.innerHTML += `Headers detectados: Código=${codeIndex}, Nombre=${nameIndex}, Precio=${priceIndex}, Stock=${stockIndex}, Cat=${catIndex}, Desc=${descIndex}<br>`;
             
-            let importedCount = 0;
-            let updatedCount = 0;
-            let errors = [];
+            let importedCount = 0, updatedCount = 0;
+            const timestamp = Date.now();
             
             for (let i = 1; i < rawData.length; i++) {
                 const row = rawData[i];
@@ -1173,6 +1269,7 @@ function importInventory(event) {
                 let price = priceIndex >= 0 ? row[priceIndex] : 0;
                 const stock = stockIndex >= 0 ? parseInt(row[stockIndex]) || 0 : 0;
                 const category = catIndex >= 0 ? String(row[catIndex] || 'Otro').trim() : 'Otro';
+                // 🔴 CORRECCIÓN: Asegurar que desc sea string, no undefined
                 const desc = descIndex >= 0 ? String(row[descIndex] || '').trim() : '';
                 
                 if (typeof price === 'string') {
@@ -1180,68 +1277,65 @@ function importInventory(event) {
                 }
                 price = parseFloat(price) || 0;
                 
-                if (!name) {
-                    errors.push(`Fila ${i + 1}: Sin nombre`);
-                    continue;
-                }
-                if (price <= 0) {
-                    errors.push(`Fila ${i + 1}: "${name}" - precio inválido`);
-                    continue;
+                if (!name) continue;
+                
+                // Buscar si existe
+                let existingIndex = data.products.findIndex(p => 
+                    p.name.toLowerCase().trim() === name.toLowerCase()
+                );
+                
+                if (existingIndex === -1 && code) {
+                    existingIndex = data.products.findIndex(p => 
+                        p.code && p.code.toLowerCase() === code.toLowerCase()
+                    );
                 }
                 
-                let existing = data.products.find(p => p.name.toLowerCase().trim() === name.toLowerCase());
-                if (!existing && code) {
-                    existing = data.products.find(p => p.code && p.code.toLowerCase() === code.toLowerCase());
-                }
-                
-                if (existing) {
-                    if (code) existing.code = code;
-                    existing.price = price;
-                    existing.stock = stock;
-                    existing.category = category;
-                    existing.desc = desc;
+                if (existingIndex >= 0) {
+                    // Actualizar existente
+                    if (code) data.products[existingIndex].code = code;
+                    if (price > 0) data.products[existingIndex].price = price;
+                    data.products[existingIndex].stock = stock;
+                    data.products[existingIndex].category = category;
+                    data.products[existingIndex].desc = desc; // 🔴 Siempre actualizar desc (incluso si está vacía)
+                    data.products[existingIndex].lastModified = timestamp;
                     updatedCount++;
+                    debugDiv.innerHTML += `✏️ Actualizado: ${name} ${desc ? '(con desc)' : ''}<br>`;
                 } else {
-                    data.products.push({
-                        id: Date.now() + Math.random(),
-                        code: code,
-                        name: name,
-                        category: category,
-                        stock: stock,
-                        price: price,
-                        desc: desc,
-                        created: new Date().toISOString()
-                    });
+                    // Crear nuevo
+                    const newProduct = { 
+                        id: timestamp + i,
+                        code: code, 
+                        name: name, 
+                        category: category, 
+                        stock: stock, 
+                        price: price, 
+                        desc: desc, // 🔴 Asegurar que desc nunca sea undefined
+                        created: new Date().toISOString(),
+                        lastModified: timestamp,
+                        deviceId: deviceId
+                    };
+                    data.products.push(newProduct);
                     importedCount++;
+                    debugDiv.innerHTML += `➕ Nuevo: ${name} ${desc ? '(con desc)' : ''}<br>`;
                 }
             }
             
-            debugDiv.innerHTML += `<strong>Resultado:</strong><br>`;
-            debugDiv.innerHTML += `✅ Nuevos: ${importedCount}<br>`;
-            debugDiv.innerHTML += `🔄 Actualizados: ${updatedCount}<br>`;
-            if (errors.length > 0) {
-                debugDiv.innerHTML += `❌ Errores: ${errors.length}<br>`;
-                debugDiv.innerHTML += errors.slice(0, 5).join('<br>') + '<br>';
-            }
-            
+            // Guardar usando saveData()
             saveData();
+            
+            // Actualizar UI
             updateProductList();
             updateDashboard();
             
-            alert(`✅ Importación completada:\n• ${importedCount} productos nuevos\n• ${updatedCount} actualizados\n• Total: ${data.products.length} productos`);
+            const mensaje = `✅ Importación completada:\n• ${importedCount} nuevos\n• ${updatedCount} actualizados`;
+            mostrarMensaje(mensaje, '#28a745');
+            alert(mensaje);
             
         } catch (error) {
-            debugDiv.innerHTML += `<br>❌ ERROR: ${error.message}<br>`;
-            console.error(error);
-            alert('Error: ' + error.message);
+            debugDiv.innerHTML += `<br>❌ ERROR: ${error.message}`;
+            alert('❌ Error: ' + error.message);
         }
-        
         event.target.value = '';
-    };
-    
-    reader.onerror = function(error) {
-        debugDiv.innerHTML += `❌ Error al leer archivo<br>`;
-        alert('Error al leer archivo');
     };
     
     reader.readAsArrayBuffer(file);
